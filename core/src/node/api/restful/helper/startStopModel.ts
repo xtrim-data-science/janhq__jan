@@ -73,7 +73,7 @@ const runModel = async (modelId: string, settingParams?: ModelSettingParams): Pr
     }),
   }
 
-  log(`[SERVER]::Debug: Nitro model settings: ${JSON.stringify(nitroModelSettings)}`)
+  log(`[SERVER]:: Nitro model settings: ${JSON.stringify(nitroModelSettings)}`)
 
   // Convert settings.prompt_template to system_prompt, user_prompt, ai_prompt
   if (modelMetadata.settings.prompt_template) {
@@ -144,7 +144,7 @@ const runNitroAndLoadModel = async (modelId: string, modelSettings: NitroModelSe
 }
 
 const spawnNitroProcess = async (): Promise<void> => {
-  log(`[SERVER]::Debug: Spawning cortex subprocess...`)
+  log(`[SERVER]:: Spawning cortex subprocess...`)
 
   let binaryFolder = join(
     getJanExtensionsPath(),
@@ -160,7 +160,7 @@ const spawnNitroProcess = async (): Promise<void> => {
   const args: string[] = ['1', LOCAL_HOST, NITRO_DEFAULT_PORT.toString()]
   // Execute the binary
   log(
-    `[SERVER]::Debug: Spawn cortex at path: ${executableOptions.executablePath}, and args: ${args}`
+    `[SERVER]:: Spawn cortex at path: ${executableOptions.executablePath}, and args: ${args}`
   )
   subprocess = spawn(
     executableOptions.executablePath,
@@ -176,7 +176,7 @@ const spawnNitroProcess = async (): Promise<void> => {
 
   // Handle subprocess output
   subprocess.stdout.on('data', (data: any) => {
-    log(`[SERVER]::Debug: ${data}`)
+    log(`[SERVER]:: ${data}`)
   })
 
   subprocess.stderr.on('data', (data: any) => {
@@ -184,12 +184,12 @@ const spawnNitroProcess = async (): Promise<void> => {
   })
 
   subprocess.on('close', (code: any) => {
-    log(`[SERVER]::Debug: cortex exited with code: ${code}`)
+    log(`[SERVER]:: cortex exited with code: ${code}`)
     subprocess = undefined
   })
 
   tcpPortUsed.waitUntilUsed(NITRO_DEFAULT_PORT, 300, 30000).then(() => {
-    log(`[SERVER]::Debug: cortex is ready`)
+    log(`[SERVER]:: cortex is ready`)
   })
 }
 
@@ -275,7 +275,7 @@ const validateModelStatus = async (): Promise<void> => {
     retries: 5,
     retryDelay: 500,
   }).then(async (res: Response) => {
-    log(`[SERVER]::Debug: Validate model state success with response ${JSON.stringify(res)}`)
+    log(`[SERVER]:: Validate model state success with response ${JSON.stringify(res)}`)
     // If the response is OK, check model_loaded status.
     if (res.ok) {
       const body = await res.json()
@@ -290,7 +290,7 @@ const validateModelStatus = async (): Promise<void> => {
 }
 
 const loadLLMModel = async (settings: NitroModelSettings): Promise<Response> => {
-  log(`[SERVER]::Debug: Loading model with params ${JSON.stringify(settings)}`)
+  log(`[SERVER]:: Loading model with params ${JSON.stringify(settings)}`)
   const fetchRT = require('fetch-retry')
   const fetchRetry = fetchRT(fetch)
 
@@ -304,7 +304,7 @@ const loadLLMModel = async (settings: NitroModelSettings): Promise<Response> => 
     retryDelay: 500,
   })
     .then((res: any) => {
-      log(`[SERVER]::Debug: Load model request with response ${JSON.stringify(res)}`)
+      log(`[SERVER]:: Load model request with response ${JSON.stringify(res)}`)
       return Promise.resolve(res)
     })
     .catch((err: any) => {
@@ -331,7 +331,7 @@ export const stopModel = async (_modelId: string) => {
       })
     }, 5000)
     const tcpPortUsed = require('tcp-port-used')
-    log(`[SERVER]::Debug: Request to kill cortex`)
+    log(`[SERVER]:: Request to kill cortex`)
 
     fetch(NITRO_HTTP_KILL_URL, {
       method: 'DELETE',
@@ -345,7 +345,7 @@ export const stopModel = async (_modelId: string) => {
         // don't need to do anything, we still kill the subprocess
       })
       .then(() => tcpPortUsed.waitUntilFree(NITRO_DEFAULT_PORT, 300, 5000))
-      .then(() => log(`[SERVER]::Debug: Nitro process is terminated`))
+      .then(() => log(`[SERVER]:: Nitro process is terminated`))
       .then(() =>
         resolve({
           message: 'Model stopped',
